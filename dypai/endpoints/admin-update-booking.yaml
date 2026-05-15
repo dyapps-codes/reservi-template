@@ -1,0 +1,36 @@
+name: admin-update-booking
+method: POST
+description: Update a booking — change status, cancel with reason, mark complete or no-show.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  required:
+    - booking_id
+    - status
+  properties:
+    booking_id:
+      type: string
+      format: uuid
+    status:
+      type: string
+    cancellation_reason:
+      type: string
+    internal_notes:
+      type: string
+    note:
+      type: string
+workflow:
+  nodes:
+    - id: handler
+      type: javascript_code
+      variable: result
+      return: true
+      env_vars: []
+      input_data: {}
+      timeout_ms: 10000
+      code_file: code/admin_update_booking.js

@@ -1,0 +1,66 @@
+name: admin-get-customer
+method: GET
+description: Customer detail with full booking history.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  required:
+    - id
+  properties:
+    id:
+      type: string
+      format: uuid
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query: |
+        SELECT
+          jsonb_build_object(
+            'id', c.id,
+            'email', c.email,
+            'full_name', c.full_name,
+            'phone', c.phone,
+            'notes', c.notes,
+            'marketing_opt_in', c.marketing_opt_in,
+            'bookings_count', c.bookings_count,
+            'last_booking_at', c.last_booking_at,
+            'created_at', c.created_at,
+            'updated_at', c.updated_at
+          ) AS customer,
+          COALESCE((
+            SELECT jsonb_agg(
+              jsonb_build_object(
+                'id', b.id,
+                'booking_code', b.booking_code,
+                'service_name', b.service_name,
+                'resource_name', b.resource_name,
+                'starts_at', b.starts_at,
+                'ends_at', b.ends_at,
+                'status', b.status,
+                'price_cents', b.price_cents,
+                'currency', b.currency,
+                'notes', b.notes,
+                'cancellation_reason', b.cancellation_reason,
+                'created_at', b.created_at
+              ) ORDER BY b.starts_at DESC
+            )
+            FROM public.bookings b WHERE b.customer_id = c.id
+          ), '[]'::jsonb) AS bookings,
+          jsonb_build_object(
+            'total',     COALESCE((SELECT COUNT(*) FROM public.bookings WHERE customer_id = c.id), 0),
+            'completed', COALESCE((SELECT COUNT(*) FROM public.bookings WHERE customer_id = c.id AND status = 'completed'), 0),
+            'cancelled', COALESCE((SELECT COUNT(*) FROM public.bookings WHERE customer_id = c.id AND status = 'cancelled'), 0),
+            'no_show',   COALESCE((SELECT COUNT(*) FROM public.bookings WHERE customer_id = c.id AND status = 'no_show'), 0),
+            'spent_cents', COALESCE((SELECT SUM(price_cents) FROM public.bookings WHERE customer_id = c.id AND status IN ('confirmed', 'completed')), 0)
+          ) AS stats
+        FROM public.customers c
+        WHERE c.id = ${input.id}::uuid
+        LIMIT 1;

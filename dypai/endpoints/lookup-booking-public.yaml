@@ -1,0 +1,56 @@
+name: lookup-booking-public
+method: GET
+description: Public booking detail by booking_code + cancel_token (no PII leak via email guessing).
+trigger:
+  http_api:
+    auth_mode: public
+input:
+  type: object
+  required:
+    - booking_code
+    - cancel_token
+  properties:
+    booking_code:
+      type: string
+    cancel_token:
+      type: string
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query: |
+        SELECT
+          jsonb_build_object(
+            'id', b.id,
+            'booking_code', b.booking_code,
+            'cancel_token', b.cancel_token,
+            'service_name', b.service_name,
+            'resource_name', b.resource_name,
+            'starts_at', b.starts_at,
+            'ends_at', b.ends_at,
+            'duration_minutes', b.duration_minutes,
+            'status', b.status,
+            'price_cents', b.price_cents,
+            'currency', b.currency,
+            'notes', b.notes,
+            'cancellation_reason', b.cancellation_reason,
+            'customer', jsonb_build_object('full_name', c.full_name, 'email', c.email, 'phone', c.phone),
+            'business', jsonb_build_object(
+              'name', s.business_name,
+              'tagline', s.tagline,
+              'contact_email', s.contact_email,
+              'contact_phone', s.contact_phone,
+              'timezone', s.timezone,
+              'cancellation_lead_minutes', s.cancellation_lead_minutes,
+              'brand_color', s.brand_color
+            )
+          ) AS booking
+        FROM public.bookings b
+        JOIN public.customers c ON c.id = b.customer_id
+        CROSS JOIN public.settings s
+        WHERE upper(b.booking_code) = upper(${input.booking_code})
+          AND b.cancel_token = ${input.cancel_token}
+          AND s.id = 1
+        LIMIT 1;

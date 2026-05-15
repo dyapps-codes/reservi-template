@@ -1,0 +1,43 @@
+name: lookup-booking
+method: GET
+description: Public booking lookup by code + customer email.
+trigger:
+  http_api:
+    auth_mode: public
+input:
+  type: object
+  required:
+    - booking_code
+    - customer_email
+  properties:
+    booking_code:
+      type: string
+    customer_email:
+      type: string
+      format: email
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query: |
+        SELECT
+          jsonb_build_object(
+            'id', b.id,
+            'booking_code', b.booking_code,
+            'service_name', b.service_name,
+            'resource_name', b.resource_name,
+            'starts_at', b.starts_at,
+            'ends_at', b.ends_at,
+            'status', b.status,
+            'price_cents', b.price_cents,
+            'currency', b.currency,
+            'notes', b.notes,
+            'customer', jsonb_build_object('full_name', c.full_name, 'email', c.email, 'phone', c.phone)
+          ) AS booking
+        FROM public.bookings b
+        JOIN public.customers c ON c.id = b.customer_id
+        WHERE upper(b.booking_code) = upper(${input.booking_code})
+          AND lower(c.email) = lower(${input.customer_email})
+        LIMIT 1;

@@ -1,0 +1,37 @@
+name: admin-list-bookings
+method: GET
+description: List bookings with filters (status, date range, resource, customer search).
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  properties:
+    status:
+      type: string
+    from:
+      type: string
+    to:
+      type: string
+    resource_id:
+      type: string
+      format: uuid
+    search:
+      type: string
+    limit:
+      type: integer
+      minimum: 1
+      maximum: 200
+    offset:
+      type: integer
+      minimum: 0
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query_file: sql/admin_list_bookings.sql

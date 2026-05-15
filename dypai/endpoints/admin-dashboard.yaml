@@ -1,0 +1,16 @@
+name: admin-dashboard
+method: GET
+description: Admin overview metrics, today's bookings and weekly stats.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query_file: sql/admin_dashboard.sql

@@ -1,0 +1,44 @@
+name: create-public-booking
+method: POST
+description: Public booking creation. Validates and books an open slot via create_booking().
+trigger:
+  http_api:
+    auth_mode: public
+input:
+  type: object
+  required:
+    - service_id
+    - starts_at
+    - customer_name
+    - customer_email
+  properties:
+    service_id:
+      type: string
+      format: uuid
+    resource_id:
+      type: string
+      format: uuid
+    starts_at:
+      type: string
+    customer_name:
+      type: string
+    customer_email:
+      type: string
+      format: email
+    customer_phone:
+      type: string
+    party_size:
+      type: integer
+      minimum: 1
+    notes:
+      type: string
+workflow:
+  nodes:
+    - id: handler
+      type: javascript_code
+      variable: result
+      return: true
+      env_vars: []
+      input_data: {}
+      timeout_ms: 15000
+      code_file: code/create_public_booking.js

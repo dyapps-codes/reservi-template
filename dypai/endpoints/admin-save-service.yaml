@@ -1,0 +1,63 @@
+name: admin-save-service
+method: POST
+description: Create or update a service. Optionally attach assigned resources.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  required:
+    - name
+    - duration_minutes
+  properties:
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+    slug:
+      type: string
+    description:
+      type: string
+    duration_minutes:
+      type: integer
+      minimum: 1
+    buffer_minutes:
+      type: integer
+      minimum: 0
+    price_cents:
+      type: integer
+      minimum: 0
+    currency:
+      type: string
+    color:
+      type: string
+    capacity:
+      type: integer
+      minimum: 1
+    requires_resource:
+      type: boolean
+    is_public:
+      type: boolean
+    is_active:
+      type: boolean
+    sort_order:
+      type: integer
+    resource_ids:
+      type: array
+      items:
+        type: string
+        format: uuid
+workflow:
+  nodes:
+    - id: handler
+      type: javascript_code
+      variable: result
+      return: true
+      env_vars: []
+      input_data: {}
+      timeout_ms: 10000
+      code_file: code/admin_save_service.js

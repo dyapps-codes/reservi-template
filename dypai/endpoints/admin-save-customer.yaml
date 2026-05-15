@@ -1,0 +1,39 @@
+name: admin-save-customer
+method: POST
+description: Create or update a customer record.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  required:
+    - email
+    - full_name
+  properties:
+    id:
+      type: string
+      format: uuid
+    email:
+      type: string
+      format: email
+    full_name:
+      type: string
+    phone:
+      type: string
+    notes:
+      type: string
+    marketing_opt_in:
+      type: boolean
+workflow:
+  nodes:
+    - id: handler
+      type: javascript_code
+      variable: result
+      return: true
+      env_vars: []
+      input_data: {}
+      timeout_ms: 5000
+      code_file: code/admin_save_customer.js

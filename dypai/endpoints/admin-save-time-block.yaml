@@ -1,0 +1,36 @@
+name: admin-save-time-block
+method: POST
+description: Create, update or delete a time block (vacation, holiday, lunch break) globally or per resource.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    resource_id:
+      type: string
+      format: uuid
+    starts_at:
+      type: string
+    ends_at:
+      type: string
+    reason:
+      type: string
+    delete:
+      type: boolean
+workflow:
+  nodes:
+    - id: handler
+      type: javascript_code
+      variable: result
+      return: true
+      env_vars: []
+      input_data: {}
+      timeout_ms: 10000
+      code_file: code/admin_save_time_block.js

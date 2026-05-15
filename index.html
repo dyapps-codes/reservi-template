@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>App</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      #splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: #f8fafc;
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        z-index: 9999;
+      }
+
+      .app-splash-logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        border: 3px solid #dbe3ef;
+        border-top-color: #2563eb;
+        animation: spin 0.8s linear infinite;
+      }
+
+      .app-splash-logo::after {
+        content: none;
+      }
+
+      .app-splash-sub {
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0;
+        line-height: 1;
+        color: #64748b;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="splash">
+        <span class="app-splash-logo" aria-hidden="true"></span>
+        <span class="app-splash-sub">Loading</span>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

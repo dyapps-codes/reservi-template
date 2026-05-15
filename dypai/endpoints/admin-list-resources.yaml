@@ -1,0 +1,50 @@
+name: admin-list-resources
+method: GET
+description: List resources with their availability rules and assigned services.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  properties: {}
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query: |
+        SELECT
+          COALESCE((
+            SELECT jsonb_agg(
+              jsonb_build_object(
+                'id', r.id,
+                'slug', r.slug,
+                'name', r.name,
+                'kind', r.kind,
+                'description', r.description,
+                'color', r.color,
+                'avatar_url', r.avatar_url,
+                'capacity', r.capacity,
+                'timezone', r.timezone,
+                'sort_order', r.sort_order,
+                'is_active', r.is_active,
+                'rules', COALESCE((
+                  SELECT jsonb_agg(jsonb_build_object('id', ar.id, 'weekday', ar.weekday, 'start_time', ar.start_time, 'end_time', ar.end_time) ORDER BY ar.weekday, ar.start_time)
+                  FROM public.availability_rules ar
+                  WHERE ar.resource_id = r.id AND ar.is_active = true
+                ), '[]'::jsonb),
+                'services', COALESCE((
+                  SELECT jsonb_agg(jsonb_build_object('id', s.id, 'name', s.name, 'slug', s.slug) ORDER BY s.sort_order, s.name)
+                  FROM public.service_resources sr
+                  JOIN public.services s ON s.id = sr.service_id
+                  WHERE sr.resource_id = r.id
+                ), '[]'::jsonb)
+              )
+              ORDER BY r.sort_order, r.name
+            )
+            FROM public.resources r
+          ), '[]'::jsonb) AS resources;

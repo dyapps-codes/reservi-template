@@ -1,0 +1,48 @@
+name: admin-list-services
+method: GET
+description: List all services (active + draft) with assigned resources.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  properties: {}
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query: |
+        SELECT
+          COALESCE((
+            SELECT jsonb_agg(
+              jsonb_build_object(
+                'id', s.id,
+                'slug', s.slug,
+                'name', s.name,
+                'description', s.description,
+                'duration_minutes', s.duration_minutes,
+                'buffer_minutes', s.buffer_minutes,
+                'price_cents', s.price_cents,
+                'currency', s.currency,
+                'color', s.color,
+                'capacity', s.capacity,
+                'requires_resource', s.requires_resource,
+                'is_public', s.is_public,
+                'is_active', s.is_active,
+                'sort_order', s.sort_order,
+                'resources', COALESCE((
+                  SELECT jsonb_agg(jsonb_build_object('id', r.id, 'name', r.name, 'slug', r.slug, 'color', r.color) ORDER BY r.sort_order, r.name)
+                  FROM public.service_resources sr
+                  JOIN public.resources r ON r.id = sr.resource_id
+                  WHERE sr.service_id = s.id
+                ), '[]'::jsonb)
+              )
+              ORDER BY s.sort_order, s.name
+            )
+            FROM public.services s
+          ), '[]'::jsonb) AS services;

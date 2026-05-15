@@ -1,0 +1,2 @@
+-- Auto-generated — do NOT edit by hand.
+-- Regenerated on every dypai_pull and after schema-affecting execute_sql (CREATE/ALTER/DROP/RENAME TABLE).

@@ -1,0 +1,65 @@
+# ============================================================================
+# DYPAI reference — endpoint with an `agent` node that invokes tool endpoints.
+# Ignored by dypai_push/validate/diff/test_endpoint (.disabled suffix).
+#
+# Pair with _example-tool.yaml.disabled — this file references that one by name.
+#
+# Copy + adapt:
+#   cp endpoints/_example-agent.yaml.disabled endpoints/chat.yaml
+# ============================================================================
+
+name: example-chat-assistant
+description: Chat assistant that uses tool endpoints to answer questions about products.
+method: POST
+
+trigger:
+  http_api:
+    auth_mode: jwt                            # user-authenticated chat
+
+input:
+  type: object
+  required: [message]
+  properties:
+    message:
+      type: string
+      description: The user's message to the assistant.
+
+output:
+  type: object
+  properties:
+    reply:     { type: string }
+    tool_calls: { type: array }
+
+workflow:
+  nodes:
+    - id: chat
+      type: agent
+      provider: openai                        # openai | anthropic | google
+      model: gpt-4o                           # model id — see list via UI or search_docs
+      credential: openai-prod                 # credential NAME — must exist (get_app_credentials)
+      return: true
+
+      system_prompt: |
+        You are a helpful shop assistant. You have access to tools for searching
+        the product catalog and sending emails. When the user asks about
+        availability, prices, or categories, call example-search-products.
+        Always be concise and friendly.
+
+      input: ${input.message}                # what the user said → the agent's turn
+
+      # ─── Tools (IMPORTANT — BY NAME, not UUID) ─────────────────────────────
+      # In YAML the parameter is `tools: [<endpoint_name>, ...]`. The codec
+      # resolves names ↔ UUIDs automatically on push/pull. Writing
+      # `tool_ids: [...]` in YAML BYPASSES the codec and fails in production.
+      #
+      # Every name here MUST reference an endpoint with `tool: true`.
+      # dypai_validate catches typos (rule: agent_tool_not_found) and lists
+      # the available tool endpoints in its fix_hint.
+      tools:
+        - example-search-products             # ← references the other example file
+        # - example-send-email                 # add more tools as you define them
+
+      # ─── Agent behavior tuning ─────────────────────────────────────────────
+      max_iterations: 5                       # max rounds of tool-calling (anti-runaway)
+      temperature: 0.7
+      tool_timeout: 30                        # seconds per tool call

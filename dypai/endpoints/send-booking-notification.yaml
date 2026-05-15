@@ -1,0 +1,35 @@
+name: send-booking-notification
+method: POST
+description: Send a transactional email for a booking (confirmation, reminder, cancellation). Uses Resend.
+allowed_roles:
+  - admin
+  - editor
+  - service
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  required:
+    - booking_id
+    - template
+  properties:
+    booking_id:
+      type: string
+      format: uuid
+    template:
+      type: string
+      description: confirmation | reminder | cancellation | reschedule
+workflow:
+  nodes:
+    - id: handler
+      type: javascript_code
+      variable: result
+      return: true
+      env_vars:
+        - RESEND_API_KEY
+        - RESEND_FROM_EMAIL
+        - PUBLIC_APP_URL
+      input_data: {}
+      timeout_ms: 15000
+      code_file: code/send_booking_notification.js

@@ -1,0 +1,162 @@
+# ============================================================================
+# DYPAI endpoint reference — complete tour of the YAML format.
+# This file is IGNORED by dypai_push, dypai_validate, dypai_diff and
+# dypai_test_endpoint (the .disabled extension keeps it out of every flow).
+#
+# Copy + adapt when authoring a new endpoint:
+#   cp endpoints/_example.yaml.disabled endpoints/my-feature.yaml
+# Then edit and remove the .disabled suffix.
+# ============================================================================
+
+name: example-process-order
+description: |
+  Reference endpoint demonstrating the canonical YAML format:
+  trigger, input/output schemas, multi-node workflow, placeholders,
+  branching, per-node error handling, and multiple return paths.
+method: POST
+
+# ─── Trigger ────────────────────────────────────────────────────────────────
+# Pick exactly one. Options:
+#   trigger: { http_api: { auth_mode: jwt | api_key | public } }
+#   trigger: { webhook: {} }                 # path is auto-generated
+#   trigger: { schedule: { cron: "0 9 * * 1-5", timezone: Europe/Madrid } }
+#   trigger: { telegram: {} }                # incoming Telegram messages
+#
+# auth_mode notes:
+#   jwt      — user-authenticated. ${current_user_id} / ${current_user_role} available.
+#   api_key  — server-to-server. No user context.
+#   public   — anonymous. Use only for read-only, non-sensitive data.
+trigger:
+  http_api:
+    auth_mode: jwt
+
+# ─── Input schema (JSON Schema) ─────────────────────────────────────────────
+# Validates the request body. Fields here are referenced via ${input.<field>}.
+# The validator (dypai_validate) catches typos in placeholders against this.
+input:
+  type: object
+  required: [product_id, quantity]
+  properties:
+    product_id:
+      type: string
+      format: uuid
+    quantity:
+      type: integer
+      minimum: 1
+    note:
+      type: string
+
+# ─── Output schema (optional but recommended) ───────────────────────────────
+# Describes the response shape. Helps the validator + frontend type-checkers.
+output:
+  type: object
+  properties:
+    order_id: { type: string }
+    total:    { type: number }
+    status:   { type: string }
+
+# ─── Workflow ───────────────────────────────────────────────────────────────
+# Nodes are the steps. Placeholders wire data flow between them:
+#
+#   ${input.<field>}            — the request body / query params
+#   ${nodes.<id>.<field>}       — output of a previous node
+#   ${current_user_id}          — ID of the JWT-authenticated user (TEXT, NOT a UUID — match against TEXT columns)
+#   ${current_user_role}        — role name from the JWT
+#
+# Expressions inside placeholders work: arithmetic, comparisons, JS-ish.
+#   ${input.qty * 2}, ${nodes.x.stock >= input.qty}
+#
+# In SQL contexts (custom_query, dypai_database queries) the engine
+# automatically casts placeholders by value shape:
+#   UUID-shaped string  →  binds as ::uuid
+#   plain object/array  →  binds as ::jsonb
+#   Date instance       →  binds as ::timestamptz
+#   text / int / bool   →  binds without an explicit cast (Postgres infers)
+# So you write SQL naturally — DON'T add type casts manually like
+# '${input.product_id}'::uuid. Just write: WHERE id = ${input.product_id}
+# (and remember: ${current_user_id} is TEXT, so user_id columns must be TEXT too).
+workflow:
+  nodes:
+
+    # 1. Read the product. `operation: query` for ANY read — pure SQL.
+    - id: get_product
+      type: dypai_database
+      operation: query
+      query: SELECT * FROM products WHERE id = ${input.product_id} LIMIT 1
+      # Output is accessible as ${nodes.get_product.<column>} (first row's columns)
+
+    # 2. Branch on stock availability.
+    #    `logic` nodes with `operation: if` send flow down two edges
+    #    differentiated by `handle: "true"` and `handle: "false"`.
+    - id: check_stock
+      type: logic
+      operation: if
+      condition: ${nodes.get_product.stock >= input.quantity}
+
+    # 3. Insert the order. `operation: mutation` for trivial single-table writes
+    #    — declarative, no SQL needed. The shape (insert/update/delete) decides.
+    - id: insert_order
+      type: dypai_database
+      operation: mutation
+      table: orders
+      insert:
+        user_id: ${current_user_id}                            # JWT identity
+        product_id: ${input.product_id}                        # request input
+        quantity: ${input.quantity}
+        unit_price: ${nodes.get_product.price}                 # cross-node ref
+        total: ${nodes.get_product.price * input.quantity}     # expression
+        note: ${input.note}
+      returning: "*"
+      # For UPSERT: add  on_conflict: { columns: [id], action: update }
+      # For UPDATE: replace `insert:` with `update: {...}` + `where: {...}`
+      # For DELETE: replace `insert:` with `delete: true` + `where: {...}`
+      #
+      # Long SQL (>1500 chars) inside `operation: query` is auto-extracted on
+      # `dypai_pull` to sql/<endpoint>.sql and referenced like:
+      #   query_file: sql/insert_order.sql
+      # Same for prompts (system_prompt_file) and JS/Python code (code_file).
+
+    # 4. Notify a downstream system. `on_error_step_id` routes failures
+    #    to `build_response` so a notification outage doesn't 500 the order.
+    - id: notify
+      type: http_request
+      method: POST
+      url: https://hooks.example.com/orders
+      body:
+        order_id: ${nodes.insert_order.id}
+        total: ${nodes.insert_order.total}
+      on_error_step_id: build_response
+
+    # 5. Build the success response. Exactly one node per code path needs
+    #    `return: true` — it marks that node's output as the HTTP body.
+    - id: build_response
+      type: set_fields
+      return: true
+      fields:
+        order_id: ${nodes.insert_order.id}
+        total: ${nodes.insert_order.total}
+        status: created
+
+    # 6. Error path: out of stock. Different shape, also `return: true`.
+    #    Multiple return nodes are fine as long as only one runs per execution.
+    - id: out_of_stock
+      type: set_fields
+      return: true
+      fields:
+        error: out_of_stock
+        message: Not enough stock for the requested quantity
+        available: ${nodes.get_product.stock}
+        requested: ${input.quantity}
+
+  # ─── Edges ────────────────────────────────────────────────────────────────
+  # Connect nodes. Form: { from: <id>, to: <id> }.
+  # For `logic` if-nodes use `handle: "true"` / `handle: "false"` to pick the branch.
+  edges:
+    - { from: get_product,  to: check_stock }
+    - { from: check_stock,  to: insert_order, handle: "true" }
+    - { from: check_stock,  to: out_of_stock, handle: "false" }
+    - { from: insert_order, to: notify }
+    - { from: notify,       to: build_response }
+
+  # `on_error` at the workflow level: stop (default) | continue
+  # on_error: stop

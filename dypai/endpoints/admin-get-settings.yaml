@@ -1,0 +1,16 @@
+name: admin-get-settings
+method: GET
+description: Read the singleton business settings row.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query: SELECT row_to_json(s) AS settings FROM public.settings s WHERE s.id = 1;

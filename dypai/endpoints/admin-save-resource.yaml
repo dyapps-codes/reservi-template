@@ -1,0 +1,59 @@
+name: admin-save-resource
+method: POST
+description: Create or update a resource (staff/room/equipment) and optionally replace its weekly availability rules.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  required:
+    - name
+  properties:
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+    slug:
+      type: string
+    kind:
+      type: string
+    description:
+      type: string
+    avatar_url:
+      type: string
+    color:
+      type: string
+    capacity:
+      type: integer
+      minimum: 1
+    timezone:
+      type: string
+    sort_order:
+      type: integer
+    is_active:
+      type: boolean
+    rules:
+      type: array
+      items:
+        type: object
+        properties:
+          weekday:
+            type: integer
+          start_time:
+            type: string
+          end_time:
+            type: string
+workflow:
+  nodes:
+    - id: handler
+      type: javascript_code
+      variable: result
+      return: true
+      env_vars: []
+      input_data: {}
+      timeout_ms: 10000
+      code_file: code/admin_save_resource.js

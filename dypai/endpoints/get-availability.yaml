@@ -1,0 +1,37 @@
+name: get-availability
+method: GET
+description: Returns available booking slots for a service on a given date (one or all assigned resources).
+trigger:
+  http_api:
+    auth_mode: public
+input:
+  type: object
+  required:
+    - service_id
+    - date
+  properties:
+    service_id:
+      type: string
+      format: uuid
+    date:
+      type: string
+      description: ISO date (YYYY-MM-DD).
+    resource_id:
+      type: string
+      format: uuid
+output:
+  type: object
+  properties:
+    ok: { type: boolean }
+    slots: { type: array }
+    service: { type: object }
+workflow:
+  nodes:
+    - id: handler
+      type: javascript_code
+      variable: result
+      return: true
+      env_vars: []
+      input_data: {}
+      timeout_ms: 10000
+      code_file: code/get_availability.js

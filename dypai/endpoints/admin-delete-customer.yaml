@@ -1,0 +1,26 @@
+name: admin-delete-customer
+method: POST
+description: Delete a customer if they have no bookings (returns refusal otherwise).
+allowed_roles:
+  - admin
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  required:
+    - id
+  properties:
+    id:
+      type: string
+      format: uuid
+workflow:
+  nodes:
+    - id: handler
+      type: javascript_code
+      variable: result
+      return: true
+      env_vars: []
+      input_data: {}
+      timeout_ms: 5000
+      code_file: code/admin_delete_customer.js

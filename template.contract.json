@@ -1,0 +1,619 @@
+{
+  "contract_version": "1",
+  "version": "1.0.0",
+  "slug": "reservi-template",
+  "name": "Reservi Booking System",
+  "status": "published",
+  "template_type": "vertical",
+  "maturity": "stable",
+  "quality_score": 0.9,
+  "source": {
+    "kind": "github",
+    "repo": "dyapps-codes/reservi-template",
+    "ref": "main",
+    "path": "",
+    "uri": "https://github.com/dyapps-codes/reservi-template"
+  },
+  "short_description": "Plantilla completa de reservas online con landing publica, flujo de reserva, detalle/cancelacion de cita y admin privado para agenda, calendario, servicios, recursos, clientes y ajustes.",
+  "long_description": "Vertical mixed para negocios que funcionan con cita previa: barberias, estudios de estetica, consultores, academias pequenas, salas por horas, servicios profesionales y experiencias con disponibilidad. Incluye landing publica, pagina de reserva por servicio, lookup/cancelacion publica por codigo, login de staff y panel privado con dashboard, reservas, calendario, servicios, recursos/staff, clientes, bloqueos de tiempo, ajustes y usuarios admin. Stack Vite + React 19 + TypeScript + Tailwind 3 + shadcn/ui + react-router-dom. Backend completo con settings, resources, services, service_resources, availability_rules, time_blocks, customers, bookings y booking_status_events; endpoints publicos para servicios/disponibilidad/reserva/cancelacion y endpoints admin para gestionar toda la operacion.",
+  "selection": {
+    "categories": [
+      "vertical",
+      "mixed-app",
+      "bookings",
+      "appointments",
+      "scheduling",
+      "calendar-admin"
+    ],
+    "tags": [
+      "reservas",
+      "booking",
+      "appointments",
+      "agenda",
+      "calendar",
+      "calendario",
+      "citas",
+      "servicios",
+      "clientes",
+      "staff",
+      "recursos",
+      "disponibilidad",
+      "cancelacion",
+      "admin",
+      "react",
+      "vite",
+      "tailwind"
+    ],
+    "aliases": [
+      "reservi",
+      "sistema de reservas",
+      "agenda online",
+      "booking app",
+      "appointment scheduler",
+      "citas online",
+      "cita previa",
+      "calendario de reservas",
+      "gestor de citas",
+      "app de reservas",
+      "reserva de horas",
+      "servicios con horario",
+      "agenda profesional",
+      "calendly para mi negocio",
+      "reservas con panel admin"
+    ],
+    "first_message_examples": [
+      "Quiero una app para que mis clientes reserven cita online",
+      "Necesito una web con agenda y panel para gestionar reservas",
+      "Hazme un sistema de reservas para mi negocio con servicios y horarios",
+      "Quiero que los clientes elijan servicio, profesional y hora",
+      "Necesito un panel para ver reservas, calendario, clientes y servicios",
+      "Crea algo tipo Calendly pero con mi marca y admin privado",
+      "Quiero una landing con boton de reservar y una agenda interna",
+      "Haz una app de booking con disponibilidad y cancelacion por codigo"
+    ],
+    "negative_examples": [
+      "Una tienda online con productos, carrito y pagos",
+      "Una radio o podcast con programacion",
+      "Una clinica con historial medico completo",
+      "Un restaurante con carta QR y comandas",
+      "Un CRM generico sin agenda de citas",
+      "Una landing simple sin gestion interna"
+    ],
+    "use_case_keywords": {
+      "primary": [
+        "reservas",
+        "citas",
+        "agenda",
+        "booking",
+        "appointments",
+        "calendario",
+        "disponibilidad"
+      ],
+      "natural_language": [
+        "que los clientes reserven hora",
+        "elegir servicio y profesional",
+        "gestionar la agenda",
+        "ver disponibilidad",
+        "cancelar una reserva",
+        "panel de citas",
+        "bloquear horarios"
+      ],
+      "domains": [
+        "servicios",
+        "barberia",
+        "estetica",
+        "wellness",
+        "consultoria",
+        "coaching",
+        "clases",
+        "alquiler-por-horas"
+      ],
+      "actions": [
+        "reservar cita",
+        "crear reserva",
+        "reprogramar cita",
+        "cancelar reserva",
+        "gestionar servicios",
+        "gestionar clientes",
+        "configurar disponibilidad",
+        "bloquear horarios"
+      ],
+      "anti": [
+        "ecommerce",
+        "inventario",
+        "radio",
+        "podcast",
+        "noticias",
+        "restaurante",
+        "historial clinico complejo"
+      ]
+    },
+    "industries": [
+      "professional-services",
+      "wellness",
+      "barbershop",
+      "beauty",
+      "consulting",
+      "education",
+      "local-services"
+    ],
+    "use_cases": [
+      "appointment-booking",
+      "calendar-management",
+      "service-scheduling",
+      "client-bookings",
+      "staff-resource-scheduling",
+      "booking-admin"
+    ],
+    "visual_styles": [
+      "dark-premium",
+      "modern-service-business",
+      "clean-admin",
+      "high-contrast"
+    ],
+    "best_for": [
+      "Negocios con cita previa donde el flujo principal es elegir servicio, profesional/recurso y horario.",
+      "Servicios locales que necesitan una landing publica y una agenda privada que funcione desde el primer build.",
+      "Casos donde hacen falta recursos/staff, disponibilidad, bloqueos, clientes, cancelacion y estados de reserva.",
+      "Base solida para adaptar a barberia, estetica, consultoria, clases privadas o alquiler por horas."
+    ],
+    "not_for": [
+      "Clinicas con historial medico complejo, recetas o expedientes clinicos avanzados.",
+      "Restaurantes con carta QR, mesas y comandas.",
+      "Tiendas online con carrito, inventario y envios.",
+      "Apps puramente editoriales, radios, podcasts o noticias.",
+      "Landings simples sin necesidad de admin ni reservas reales."
+    ]
+  },
+  "agent_decision_signals": {
+    "must_match_one_of": [
+      "reservas",
+      "citas",
+      "agenda",
+      "booking",
+      "calendario",
+      "disponibilidad",
+      "servicios con horario",
+      "cita previa"
+    ],
+    "must_not_match": [
+      "ecommerce",
+      "radio",
+      "podcast",
+      "noticias",
+      "restaurante",
+      "facturacion",
+      "portfolio"
+    ],
+    "ambiguous_signal_action": "Prefer this template when the user needs a public booking flow plus admin calendar/service/customer management.",
+    "fallback_priority": 8
+  },
+  "access_profile": {
+    "app_visibility": "mixed",
+    "auth_scope": "admin_only",
+    "has_public_area": true,
+    "has_admin_area": true,
+    "root_requires_auth": false,
+    "home_path": "/",
+    "booking_path": "/book",
+    "admin_path": "/dashboard",
+    "login_path": "/login",
+    "forgot_password_path": "/forgot-password",
+    "password_recovery_path": "/reset-password",
+    "notes": "Public landing and booking flow are open. Dashboard, calendar, services, resources, customers, settings and admin users are protected."
+  },
+  "routes": [
+    {
+      "path": "/",
+      "name": "Landing",
+      "visibility": "public",
+      "purpose": "Public service business landing with CTA to reserve."
+    },
+    {
+      "path": "/book",
+      "name": "Book",
+      "visibility": "public",
+      "purpose": "Public booking flow."
+    },
+    {
+      "path": "/book/:serviceSlug",
+      "name": "Book Service",
+      "visibility": "public",
+      "purpose": "Public booking flow preselected by service."
+    },
+    {
+      "path": "/r/:code",
+      "name": "Booking Detail",
+      "visibility": "public",
+      "purpose": "Public booking lookup/cancellation detail by code."
+    },
+    {
+      "path": "/login",
+      "name": "Login",
+      "visibility": "public",
+      "purpose": "Staff/admin login."
+    },
+    {
+      "path": "/dashboard",
+      "name": "Dashboard",
+      "visibility": "private",
+      "purpose": "Operational KPI dashboard."
+    },
+    {
+      "path": "/bookings",
+      "name": "Bookings",
+      "visibility": "private",
+      "purpose": "Manage bookings."
+    },
+    {
+      "path": "/calendar",
+      "name": "Calendar",
+      "visibility": "private",
+      "purpose": "Calendar view."
+    },
+    {
+      "path": "/services",
+      "name": "Services",
+      "visibility": "private",
+      "purpose": "Manage service catalog."
+    },
+    {
+      "path": "/resources",
+      "name": "Resources",
+      "visibility": "private",
+      "purpose": "Manage staff/rooms/equipment."
+    },
+    {
+      "path": "/customers",
+      "name": "Customers",
+      "visibility": "private",
+      "purpose": "Manage customers."
+    },
+    {
+      "path": "/customers/:id",
+      "name": "Customer Detail",
+      "visibility": "private",
+      "purpose": "Customer booking history."
+    },
+    {
+      "path": "/settings",
+      "name": "Settings",
+      "visibility": "private",
+      "purpose": "Business and booking rules settings."
+    },
+    {
+      "path": "/admin/users",
+      "name": "Admin Users",
+      "visibility": "private",
+      "purpose": "Admin-only user management."
+    }
+  ],
+  "frontend_contract": {
+    "framework": "Vite",
+    "language": "TypeScript",
+    "router": "react-router-dom",
+    "styling": "Tailwind CSS 3 + shadcn/ui",
+    "ui_system": "Radix primitives, lucide-react, sonner, React Query",
+    "files": [
+      "src/App.tsx",
+      "src/pages/Landing.tsx",
+      "src/pages/Book.tsx",
+      "src/pages/BookingDetail.tsx",
+      "src/pages/Dashboard.tsx",
+      "src/pages/Bookings.tsx",
+      "src/pages/Calendar.tsx",
+      "src/pages/Services.tsx",
+      "src/pages/Resources.tsx",
+      "src/pages/Customers.tsx",
+      "src/pages/Settings.tsx",
+      "src/components/CreateBookingDialog.tsx",
+      "src/lib/dypai.ts",
+      "src/lib/types.ts"
+    ],
+    "entrypoints": [
+      "src/main.tsx",
+      "src/App.tsx"
+    ]
+  },
+  "backend_contract": {
+    "mode": "dypai",
+    "has_dypai_folder": true,
+    "built_in_capabilities": [
+      "public booking creation",
+      "availability calculation",
+      "booking lookup and cancellation",
+      "admin booking CRUD",
+      "service/resource/customer management",
+      "settings management",
+      "booking status events"
+    ],
+    "guidance": [
+      "Public endpoints are for service listing, availability, booking creation, lookup and cancellation.",
+      "Admin endpoints require authenticated staff/admin and power the dashboard/calendar/CRUD pages.",
+      "Do not duplicate booking tables or endpoints; adapt existing Reservi contracts."
+    ],
+    "endpoints": [
+      "list-public-services",
+      "get-availability",
+      "create-public-booking",
+      "lookup-booking-public",
+      "lookup-booking",
+      "cancel-booking-public",
+      "send-booking-notification",
+      "admin-dashboard",
+      "admin-list-bookings",
+      "admin-create-booking",
+      "admin-update-booking",
+      "admin-reschedule-booking",
+      "admin-list-services",
+      "admin-save-service",
+      "admin-list-resources",
+      "admin-save-resource",
+      "admin-list-customers",
+      "admin-get-customer",
+      "admin-save-customer",
+      "admin-delete-customer",
+      "admin-list-time-blocks",
+      "admin-save-time-block",
+      "admin-get-settings",
+      "admin-save-settings"
+    ]
+  },
+  "database_contract": {
+    "mode": "postgres",
+    "schema_path": "dypai/schema.sql",
+    "migrations_path": "dypai/migrations",
+    "tables": [
+      {
+        "name": "settings",
+        "purpose": "Business settings and booking rules."
+      },
+      {
+        "name": "resources",
+        "purpose": "Staff, rooms or equipment used for bookings."
+      },
+      {
+        "name": "services",
+        "purpose": "Bookable service catalog."
+      },
+      {
+        "name": "service_resources",
+        "purpose": "Service-resource eligibility."
+      },
+      {
+        "name": "availability_rules",
+        "purpose": "Weekly availability per resource."
+      },
+      {
+        "name": "time_blocks",
+        "purpose": "Blocked periods and exceptions."
+      },
+      {
+        "name": "customers",
+        "purpose": "Customer records."
+      },
+      {
+        "name": "bookings",
+        "purpose": "Booking records with status, source, price and timing."
+      },
+      {
+        "name": "booking_status_events",
+        "purpose": "Audit trail for booking changes."
+      }
+    ]
+  },
+  "customization_targets": [
+    {
+      "key": "business_identity",
+      "files": [
+        "src/lib/app-config.ts",
+        "src/pages/Landing.tsx",
+        "src/components/layout/Sidebar.tsx"
+      ],
+      "description": "Business name, tagline, contact details and admin app name."
+    },
+    {
+      "key": "public_booking_flow",
+      "files": [
+        "src/pages/Book.tsx",
+        "src/pages/BookingDetail.tsx",
+        "src/pages/Landing.tsx"
+      ],
+      "description": "Public service selection, availability display, booking form and cancellation/lookup copy."
+    },
+    {
+      "key": "service_catalog",
+      "files": [
+        "src/pages/Services.tsx",
+        "dypai/endpoints/admin-save-service.yaml",
+        "dypai/migrations/0001_reservi_schema.sql"
+      ],
+      "description": "Service names, durations, prices, buffers and resource assignment."
+    },
+    {
+      "key": "admin_operations",
+      "files": [
+        "src/pages/Dashboard.tsx",
+        "src/pages/Bookings.tsx",
+        "src/pages/Calendar.tsx",
+        "src/pages/Customers.tsx",
+        "src/pages/Settings.tsx"
+      ],
+      "description": "Admin dashboard, booking management, calendar, customers and settings."
+    },
+    {
+      "key": "theme",
+      "files": [
+        "src/index.css"
+      ],
+      "description": "HSL design tokens for brand palette."
+    }
+  ],
+  "default_first_screen": {
+    "page": "src/pages/Landing.tsx",
+    "shape": "Premium service-business landing with service cards, team/resources, booking CTA, FAQ and contact details.",
+    "data_strategy": "Use baked DYPAI seed data for services/resources/settings, then adapt copy, services and prices to the user's business.",
+    "interaction": "Public CTA opens /book; booking creation calls real public endpoints; admin pages call protected endpoints."
+  },
+  "verification_contract": {
+    "commands": [
+      "npm run build"
+    ],
+    "smoke_routes": [
+      "/",
+      "/book",
+      "/dashboard",
+      "/bookings",
+      "/calendar",
+      "/services",
+      "/settings"
+    ],
+    "backend_expectations": [
+      "list-public-services returns settings, services and resources.",
+      "get-availability returns bookable slots.",
+      "create-public-booking is public.",
+      "admin endpoints are private/staff-only."
+    ]
+  },
+  "agent_brief": {
+    "already_included": [
+      "Mixed public + admin booking system with public landing, booking flow, booking lookup/cancel page, and protected admin shell.",
+      "Public endpoints for services, availability, booking creation, booking lookup and cancellation.",
+      "Private admin endpoints for bookings, customers, services, resources, time blocks, settings and admin users.",
+      "Booking schema with settings, services, resources, availability rules, time blocks, customers, bookings, booking status events and notifications.",
+      "Code-file endpoints for complex booking operations; SQL-file endpoints for dashboard/listing queries."
+    ],
+    "adaptation_steps": [
+      "Adapt Landing.tsx, Book.tsx and src/lib/app-config.ts to the user's business, services, staff/resources and tone.",
+      "Preserve the public booking flow and connect changes to existing booking endpoints instead of creating duplicate reservation endpoints.",
+      "Adapt admin pages only where the user's booking model needs different fields or terminology.",
+      "Keep public endpoints public and admin endpoints JWT-protected.",
+      "Verify the booking flow and admin pages compile after changes."
+    ],
+    "do_not_rebuild": [
+      "Do not create duplicate booking tables or duplicate reservation endpoints.",
+      "Do not replace the booking availability logic unless the user explicitly asks for a different scheduling model.",
+      "Do not remove ProtectedRoute/admin auth boundaries.",
+      "Do not create custom auth endpoints; reuse DYPAI auth."
+    ],
+    "first_build_goal": "A branded booking landing and working public booking flow adapted to the user's service business, while preserving the existing admin booking operations.",
+    "completion_checks": [
+      "Public /, /book and /r/:code routes still compile.",
+      "Admin booking/customer/service/resource/settings pages still compile.",
+      "The agent reused existing booking endpoints and tables.",
+      "Any new public form endpoint remains auth_mode public; admin operations remain JWT-protected."
+    ]
+  },
+  "backend_reuse_contract": {
+    "existing_tables": [
+      "settings",
+      "resources",
+      "services",
+      "service_resources",
+      "availability_rules",
+      "time_blocks",
+      "customers",
+      "bookings",
+      "booking_status_events",
+      "notifications"
+    ],
+    "existing_endpoints": [
+      "admin-create-booking",
+      "admin-dashboard",
+      "admin-delete-customer",
+      "admin-get-customer",
+      "admin-get-settings",
+      "admin-list-bookings",
+      "admin-list-customers",
+      "admin-list-resources",
+      "admin-list-services",
+      "admin-list-time-blocks",
+      "admin-reschedule-booking",
+      "admin-save-customer",
+      "admin-save-resource",
+      "admin-save-service",
+      "admin-save-settings",
+      "admin-save-time-block",
+      "admin-update-booking",
+      "cancel-booking-public",
+      "create-public-booking",
+      "get-availability",
+      "list-public-services",
+      "lookup-booking",
+      "lookup-booking-public",
+      "send-booking-notification"
+    ],
+    "existing_workflows": [
+      "availability calculation",
+      "booking creation",
+      "booking cancellation",
+      "admin rescheduling"
+    ],
+    "platform_capabilities": [
+      "auth",
+      "admin roles",
+      "public endpoints"
+    ],
+    "must_reuse": [
+      "Booking tables and availability logic",
+      "create-public-booking and get-availability for public booking",
+      "admin-* endpoints for protected management",
+      "DYPAI auth and ProtectedRoute for admin"
+    ],
+    "may_extend": [
+      "Add business-specific fields to services/resources/customers/bookings if needed",
+      "Add notifications, deposits or payment endpoints in a later iteration",
+      "Add vertical-specific landing sections"
+    ],
+    "must_not_duplicate": [
+      "Do not create a second bookings/reservations table",
+      "Do not create duplicate public booking endpoints",
+      "Do not create custom auth tables/endpoints"
+    ]
+  },
+  "media_plan": {
+    "should_generate_images": true,
+    "default_image_count": 1,
+    "max_image_count": 3,
+    "image_targets": [
+      "public landing hero matched to the user's service business",
+      "service category image or staff/resource portrait set",
+      "optional booking confirmation/empty-state visual"
+    ],
+    "guidance": "Generate imagery only when it improves the public landing. Keep admin pages utilitarian; do not generate decorative admin images unless there is an empty-state need."
+  },
+  "preferred_providers": null,
+  "required_env_vars": [],
+  "required_integrations": [],
+  "dependencies": [
+    "@dypai-ai/client-sdk",
+    "@tanstack/react-query",
+    "react-router-dom",
+    "lucide-react",
+    "sonner",
+    "date-fns",
+    "recharts"
+  ],
+  "agent_instructions": "Use this template when the user needs a reservations, appointments, agenda or booking app. Do not mention the internal template name to the end user. Preserve the mixed surface: public landing and booking flow plus protected admin. Reuse existing DYPAI endpoints and tables for services, resources, availability, customers and bookings. Public booking/contact actions must use public endpoints; admin management stays protected.",
+  "design_system": {
+    "color_space": "HSL",
+    "theme_file": "src/index.css",
+    "tailwind_version": "3.x",
+    "fonts": {
+      "sans": "Inter (loaded via Google Fonts)",
+      "display": "Inter with strong weights for booking landing headings",
+      "mono": "system monospace"
+    },
+    "palette": {
+      "intent": "clean SaaS booking app: blue primary + pale blue accent",
+      "primary": "214 84% 56%",
+      "accent": "214 95% 88%",
+      "background": "0 0% 100%",
+      "secondary": "220 26% 18%",
+      "text": "224 15% 15%",
+      "light_mode": "default HSL tokens in src/index.css",
+      "dark_mode": "available via .dark class on html"
+    },
+    "guidance": "Keep the UI clean, operational and appointment-focused. Retune HSL tokens in src/index.css for the vertical (barberia: charcoal/gold, wellness: sage/cream, consulting: navy/cyan) without changing the token structure."
+  }
+}

@@ -1,0 +1,76 @@
+# ============================================================================
+# DYPAI reference — endpoint exposed as a TOOL for `agent` nodes.
+# Ignored by dypai_push/validate/diff/test_endpoint (.disabled suffix).
+#
+# Pair with _example-agent.yaml.disabled — that one has an agent node that
+# references THIS endpoint by name.
+#
+# Copy + adapt:
+#   cp endpoints/_example-tool.yaml.disabled endpoints/search-products.yaml
+# ============================================================================
+
+name: example-search-products
+description: Search the product catalog. Exposed as a tool for agent nodes.
+method: GET
+
+# ─── Tool flag + description ────────────────────────────────────────────────
+# `tool: true` exposes this endpoint to agent nodes (writes is_tool=true in DB).
+# `tool_description` is the prompt the LLM reads when deciding to call it.
+# Be SPECIFIC about when to use it and what it returns — vague descriptions
+# cause the LLM to skip useful tools or misuse them.
+tool: true
+tool_description: |
+  Search the product catalog by free-text query.
+  Use when the user asks about availability, prices, or categories.
+  Returns up to `limit` products with id, name, price, stock.
+
+# ─── Input schema (tight JSON Schema with descriptions) ─────────────────────
+# The LLM uses THIS schema to fabricate tool arguments. Every field benefits
+# from a `description`; typed and required fields keep hallucinated args out.
+input:
+  type: object
+  required: [query]
+  properties:
+    query:
+      type: string
+      description: Free-text search term (matches product name, case-insensitive).
+    limit:
+      type: integer
+      default: 10
+      minimum: 1
+      maximum: 50
+      description: Max results to return.
+
+# ─── Output schema (optional but recommended for tools) ─────────────────────
+output:
+  type: object
+  properties:
+    results:
+      type: array
+      items:
+        type: object
+        properties:
+          id:    { type: string }
+          name:  { type: string }
+          price: { type: number }
+          stock: { type: integer }
+
+# ─── Trigger ────────────────────────────────────────────────────────────────
+# Agent calls are server-to-server → `api_key`. Use `jwt` only if the tool
+# needs ${current_user_id}. NEVER `public` for a tool that writes data.
+trigger:
+  http_api:
+    auth_mode: api_key
+
+workflow:
+  nodes:
+    - id: run
+      type: dypai_database
+      operation: query
+      return: true
+      query: |
+        SELECT id, name, price, stock
+        FROM products
+        WHERE name ILIKE '%' || ${input.query} || '%'
+        ORDER BY name
+        LIMIT ${input.limit}

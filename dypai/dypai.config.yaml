@@ -1,0 +1,6 @@
+# DYPAI project configuration — commit this file.
+# It identifies which remote project this dypai/ folder belongs to.
+# Never edit by hand unless you KNOW you're retargeting to a different project.
+project_id: 3e6121f4-f1bf-4963-a12d-242e5fe6db91
+project_name: Reservi
+organization: DYPAI DEV

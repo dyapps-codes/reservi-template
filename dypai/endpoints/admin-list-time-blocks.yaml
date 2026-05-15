@@ -1,0 +1,46 @@
+name: admin-list-time-blocks
+method: GET
+description: List time blocks within a date range, optionally filtered by resource.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  properties:
+    from:
+      type: string
+    to:
+      type: string
+    resource_id:
+      type: string
+      format: uuid
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query: |
+        SELECT
+          COALESCE((
+            SELECT jsonb_agg(
+              jsonb_build_object(
+                'id', tb.id,
+                'resource_id', tb.resource_id,
+                'resource_name', r.name,
+                'starts_at', tb.starts_at,
+                'ends_at', tb.ends_at,
+                'reason', tb.reason,
+                'created_at', tb.created_at
+              )
+              ORDER BY tb.starts_at
+            )
+            FROM public.time_blocks tb
+            LEFT JOIN public.resources r ON r.id = tb.resource_id
+            WHERE (NULLIF(${input.from}, '') IS NULL OR tb.ends_at   >= ${input.from}::timestamptz)
+              AND (NULLIF(${input.to},   '') IS NULL OR tb.starts_at <  ${input.to}::timestamptz)
+              AND (NULLIF(${input.resource_id}, '') IS NULL OR tb.resource_id = ${input.resource_id}::uuid)
+          ), '[]'::jsonb) AS time_blocks;

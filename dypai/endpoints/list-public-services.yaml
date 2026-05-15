@@ -1,0 +1,77 @@
+name: list-public-services
+method: GET
+description: Public storefront data — settings, bookable services and resources with weekly availability for the landing page.
+trigger:
+  http_api:
+    auth_mode: public
+input:
+  type: object
+  properties: {}
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query: |
+        SELECT
+          jsonb_build_object(
+            'business_name', s.business_name,
+            'tagline', s.tagline,
+            'contact_email', s.contact_email,
+            'contact_phone', s.contact_phone,
+            'timezone', s.timezone,
+            'locale', s.locale,
+            'currency', s.currency,
+            'brand_color', s.brand_color,
+            'hero_image_url', s.hero_image_url,
+            'booking_window_days', s.booking_window_days,
+            'min_lead_minutes', s.min_lead_minutes,
+            'slot_step_minutes', s.slot_step_minutes
+          ) AS settings,
+          COALESCE((
+            SELECT jsonb_agg(
+              jsonb_build_object(
+                'id', sv.id,
+                'slug', sv.slug,
+                'name', sv.name,
+                'description', sv.description,
+                'duration_minutes', sv.duration_minutes,
+                'price_cents', sv.price_cents,
+                'currency', sv.currency,
+                'color', sv.color,
+                'capacity', sv.capacity,
+                'requires_resource', sv.requires_resource,
+                'resources', COALESCE((
+                  SELECT jsonb_agg(jsonb_build_object('id', r.id, 'slug', r.slug, 'name', r.name, 'color', r.color) ORDER BY r.sort_order, r.name)
+                  FROM public.service_resources sr
+                  JOIN public.resources r ON r.id = sr.resource_id AND r.is_active = true
+                  WHERE sr.service_id = sv.id
+                ), '[]'::jsonb)
+              )
+              ORDER BY sv.sort_order, sv.name
+            )
+            FROM public.services sv
+            WHERE sv.is_active = true AND sv.is_public = true
+          ), '[]'::jsonb) AS services,
+          COALESCE((
+            SELECT jsonb_agg(
+              jsonb_build_object(
+                'id', r.id,
+                'name', r.name,
+                'kind', r.kind,
+                'color', r.color,
+                'avatar_url', r.avatar_url,
+                'rules', COALESCE((
+                  SELECT jsonb_agg(jsonb_build_object('weekday', ar.weekday, 'start_time', ar.start_time, 'end_time', ar.end_time) ORDER BY ar.weekday, ar.start_time)
+                  FROM public.availability_rules ar
+                  WHERE ar.resource_id = r.id AND ar.is_active = true
+                ), '[]'::jsonb)
+              )
+              ORDER BY r.sort_order, r.name
+            )
+            FROM public.resources r
+            WHERE r.is_active = true
+          ), '[]'::jsonb) AS resources
+        FROM public.settings s
+        WHERE s.id = 1;

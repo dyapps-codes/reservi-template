@@ -1,0 +1,51 @@
+name: admin-list-customers
+method: GET
+description: List customers with optional search and last-booking info.
+allowed_roles:
+  - admin
+  - editor
+trigger:
+  http_api:
+    auth_mode: jwt
+input:
+  type: object
+  properties:
+    search:
+      type: string
+    limit:
+      type: integer
+      minimum: 1
+      maximum: 200
+    offset:
+      type: integer
+      minimum: 0
+workflow:
+  nodes:
+    - id: db
+      type: dypai_database
+      operation: query
+      return: true
+      query: |
+        WITH params AS (
+          SELECT
+            NULLIF(${input.search}, '') AS search_in,
+            LEAST(GREATEST(COALESCE(${input.limit}, 50), 1), 200) AS lim,
+            GREATEST(COALESCE(${input.offset}, 0), 0)             AS off
+        ),
+        filtered AS (
+          SELECT c.*
+          FROM public.customers c
+          CROSS JOIN params p
+          WHERE p.search_in IS NULL
+             OR c.full_name ILIKE '%' || p.search_in || '%'
+             OR c.email     ILIKE '%' || p.search_in || '%'
+             OR c.phone     ILIKE '%' || p.search_in || '%'
+        )
+        SELECT
+          COALESCE((SELECT jsonb_agg(to_jsonb(f) ORDER BY last_booking_at DESC NULLS LAST) FROM (
+            SELECT * FROM filtered
+            ORDER BY last_booking_at DESC NULLS LAST
+            LIMIT (SELECT lim FROM params)
+            OFFSET (SELECT off FROM params)
+          ) f), '[]'::jsonb) AS customers,
+          (SELECT COUNT(*) FROM filtered) AS total;
